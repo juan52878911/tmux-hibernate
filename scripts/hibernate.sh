@@ -176,9 +176,10 @@ echo "$PANES" | while read -r PANE PANE_PID TTY WIN STATE CWD_RAW; do
       SOCK=""; [ "$(popt "$NAME" rpc)" = nvim ] && SOCK="$(nvim_socket "$JOBP")"
       if [ -n "$SOCK" ]; then
         # Neovim: over RPC, immune to the user's key mappings.
-        q() { printf '%s' "$1" | sed "s/'/''/g"; }
-        RES="$(with_timeout 5 nvim --headless --clean --server "$SOCK" --remote-expr \
-          "luaeval('dofile(_A[1])(_A[2], _A[3])', ['$(q "$HIB_DIR/scripts/nvim-save.lua")', '$(q "$SESSFILE")', '$(q "$(popt "$NAME" sessionoptions)")'])" 2>/dev/null)"
+        RES="$(HIB_NVIM_SOCK="$SOCK" HIB_NVIM_SAVE="$HIB_DIR/scripts/nvim-save.lua" \
+          HIB_NVIM_SESSION="$SESSFILE" HIB_NVIM_SESSIONOPTIONS="$(popt "$NAME" sessionoptions)" \
+          with_timeout 5 nvim --headless --clean -u NONE -i NONE \
+          -c "luafile $(printf '%s' "$HIB_DIR/scripts/nvim-rpc.lua" | sed 's/ /\\ /g')" 2>/dev/null)"
       else
         # Vim (or Neovim without a socket): type the command. Escape is the
         # one key nobody remaps in normal mode.
