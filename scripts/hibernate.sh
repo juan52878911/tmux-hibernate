@@ -197,6 +197,7 @@ echo "$PANES" | while read -r PANE PANE_PID TTY WIN STATE CWD_RAW; do
           freeze "$PANE" "$FG" && setp "$PANE" redraw "$(popt "$NAME" redraw)"
         fi
         log "editor kept open in $SESSION $PANE (${RES:-no answer}, socket ${SOCK:-none})"
+        [ "$RES" = saved ] && log "  still there: $(ps -o pid=,stat=,args= -p "$(echo $JOBP | tr ' ' ',')" 2>/dev/null | tr '\n' ';')"
       fi ;;
 
     agent)

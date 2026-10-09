@@ -119,5 +119,5 @@ check "busy program left alone"     '[ -z "$(st $P_TOP)" ]'
 T send-keys -t "$P_TOP" C-c
 
 echo "$pass passed, $fail failed"
-if [ "$fail" -gt 0 ]; then echo "--- plugin log"; cat "$WORK/hibernate.log" 2>/dev/null; echo "--- nvim sockets"; ls -la "${XDG_RUNTIME_DIR:-/nonexistent}" "${TMPDIR:-/tmp}"/nvim.* 2>&1 | head -20; fi
+if [ "$fail" -gt 0 ]; then echo "--- plugin log"; cat "$WORK/hibernate.log" 2>/dev/null; fi
 [ "$fail" -eq 0 ]
