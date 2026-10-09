@@ -21,7 +21,8 @@ trap cleanup EXIT
 mkdir -p "$WORK/bin"
 printf '#!/bin/sh\necho "fake claude $*"; sleep 3600\n' >"$WORK/bin/claude"
 chmod +x "$WORK/bin/claude"
-echo hello >"$WORK/clean.txt"
+# One file per editor: two editors on one file stop at the swap-file prompt.
+for f in nv dirty bare vim; do echo hello >"$WORK/$f.txt"; done
 
 SH="${E2E_SHELL:-zsh -f}"
 # shellcheck disable=SC2034  # used inside the eval'd checks
@@ -37,17 +38,17 @@ sleep 0.5
 P_TOP=$(T display -p -t S '#{pane_id}')
 P_NV=$(T new-window -P -F '#{pane_id}' -t S)
 P_DIRTY=$(T new-window -P -F '#{pane_id}' -t S)
-P_BARE=$(T new-window -P -F '#{pane_id}' -t S "nvim --clean $WORK/clean.txt")
+P_BARE=$(T new-window -P -F '#{pane_id}' -t S "nvim --clean $WORK/bare.txt")
 P_AG=$(T new-window -P -F '#{pane_id}' -t S)
 P_ID=$(T new-window -P -F '#{pane_id}' -t S)
 P_VIM=$(T new-window -P -F '#{pane_id}' -t S)
 sleep 0.5
 T send-keys -t "$P_TOP" 'sleep 3600' Enter
-T send-keys -t "$P_NV" "nvim --clean $WORK/clean.txt" Enter
-T send-keys -t "$P_DIRTY" "nvim --clean $WORK/clean.txt" Enter
+T send-keys -t "$P_NV" "nvim --clean $WORK/nv.txt" Enter
+T send-keys -t "$P_DIRTY" "nvim --clean $WORK/dirty.txt" Enter
 T send-keys -t "$P_AG" 'claude --model x' Enter
 T send-keys -t "$P_ID" 'claude' Enter
-T send-keys -t "$P_VIM" "vim -u NONE -N $WORK/clean.txt" Enter
+T send-keys -t "$P_VIM" "vim -u NONE -N $WORK/vim.txt" Enter
 sleep 1.5
 # Give the second agent a session file like Claude Code writes, with its pid.
 mkdir -p "$HOME/.claude/sessions"
