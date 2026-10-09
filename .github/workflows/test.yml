@@ -12,6 +12,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         shell: ['zsh -f', 'bash --norc', 'fish --no-config']
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - name: Dependencies (Linux)
@@ -25,7 +26,12 @@ jobs:
       - name: End-to-end
         env:
           E2E_SHELL: ${{ matrix.shell }}
-        run: tests/e2e.sh
+        run: |
+          # Bounded, traced run: on failure show where it was.
+          perl -e 'alarm shift; exec @ARGV' 300 bash -x tests/e2e.sh 2>trace.log
+          status=$?
+          [ "$status" -eq 0 ] || tail -n 80 trace.log
+          exit "$status"
 
   shellcheck:
     runs-on: ubuntu-latest
