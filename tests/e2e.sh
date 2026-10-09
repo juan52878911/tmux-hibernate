@@ -30,6 +30,7 @@ T -f "${E2E_CONF:-/dev/null}" new-session -d -s S -x 120 -y 30 "env PATH=\"$WORK
 T set -g default-command "env PATH=\"$WORK/bin:\$PATH\" $SH"
 T set -g @hibernate-busy-sample 1
 T set -g @hibernate-quit-timeout 3
+T set -g @hibernate-log "$WORK/hibernate.log"
 T run-shell "$ROOT/hibernate.tmux"
 sleep 0.5
 
@@ -117,4 +118,5 @@ check "busy program left alone"     '[ -z "$(st $P_TOP)" ]'
 T send-keys -t "$P_TOP" C-c
 
 echo "$pass passed, $fail failed"
+if [ "$fail" -gt 0 ]; then echo "--- plugin log"; cat "$WORK/hibernate.log" 2>/dev/null; echo "--- nvim sockets"; ls -la "${XDG_RUNTIME_DIR:-/nonexistent}" "${TMPDIR:-/tmp}"/nvim.* 2>&1 | head -20; fi
 [ "$fail" -eq 0 ]

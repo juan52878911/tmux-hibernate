@@ -196,7 +196,7 @@ echo "$PANES" | while read -r PANE PANE_PID TTY WIN STATE CWD_RAW; do
         if [ "$(opt editor-dirty freeze)" = freeze ]; then
           freeze "$PANE" "$FG" && setp "$PANE" redraw "$(popt "$NAME" redraw)"
         fi
-        log "editor kept open in $SESSION $PANE ($RES)"
+        log "editor kept open in $SESSION $PANE (${RES:-no answer}, socket ${SOCK:-none})"
       fi ;;
 
     agent)
