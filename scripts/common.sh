@@ -178,10 +178,16 @@ with_timeout() {
   return "$rc"
 }
 
+# Is any process of group $1 still alive? Zombies do not count: a pane kept
+# with remain-on-exit leaves its program unreaped, and kill -0 says it lives.
+group_alive() {
+  ps -A -o pgid=,stat= 2>/dev/null | awk -v g="$1" '$1 == g && $2 !~ /^Z/ { f = 1 } END { exit !f }'
+}
+
 # Wait up to $2 seconds for process group $1 to disappear.
 wait_group_gone() {
   local g="$1" i=0 max=$(( ${2:-5} * 10 ))
-  while kill -0 -"$g" 2>/dev/null; do
+  while group_alive "$g"; do
     i=$((i + 1)); [ "$i" -ge "$max" ] && return 1
     sleep 0.1
   done
