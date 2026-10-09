@@ -164,6 +164,20 @@ is_shell() {
   printf '%s' "$1" | grep -Eq "$re"
 }
 
+# with_timeout SECONDS CMD...  ->  run CMD, killed if it takes longer (macOS has
+# no timeout(1)). Its stdin is /dev/null so it can never wait on a terminal.
+with_timeout() {
+  local secs="$1" pid watcher rc
+  shift
+  "$@" </dev/null &
+  pid=$!
+  ( sleep "$secs"; kill -TERM "$pid" 2>/dev/null; sleep 1; kill -KILL "$pid" 2>/dev/null ) >/dev/null 2>&1 &
+  watcher=$!
+  wait "$pid"; rc=$?
+  kill "$watcher" 2>/dev/null; wait "$watcher" 2>/dev/null
+  return "$rc"
+}
+
 # Wait up to $2 seconds for process group $1 to disappear.
 wait_group_gone() {
   local g="$1" i=0 max=$(( ${2:-5} * 10 ))

@@ -28,6 +28,7 @@ jobs:
           E2E_SHELL: ${{ matrix.shell }}
         run: |
           # Bounded, traced run: on failure show where it was.
+          set +e
           perl -e 'alarm shift; exec @ARGV' 300 bash -x tests/e2e.sh 2>trace.log
           status=$?
           [ "$status" -eq 0 ] || tail -n 80 trace.log

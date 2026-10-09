@@ -177,7 +177,7 @@ echo "$PANES" | while read -r PANE PANE_PID TTY WIN STATE CWD_RAW; do
       if [ -n "$SOCK" ]; then
         # Neovim: over RPC, immune to the user's key mappings.
         q() { printf '%s' "$1" | sed "s/'/''/g"; }
-        RES="$(nvim --headless --clean --server "$SOCK" --remote-expr \
+        RES="$(with_timeout 5 nvim --headless --clean --server "$SOCK" --remote-expr \
           "luaeval('dofile(_A[1])(_A[2], _A[3])', ['$(q "$HIB_DIR/scripts/nvim-save.lua")', '$(q "$SESSFILE")', '$(q "$(popt "$NAME" sessionoptions)")'])" 2>/dev/null)"
       else
         # Vim (or Neovim without a socket): type the command. Escape is the
@@ -214,7 +214,7 @@ echo "$PANES" | while read -r PANE PANE_PID TTY WIN STATE CWD_RAW; do
     script)
       # User adapter: gets pane, pgid, matched pid; prints the restore command
       # and must stop the program itself. Non-zero exit = leave it alone.
-      CMD="$("$(popt "$NAME" script | sed "s#^~#$HOME#")" "$PANE" "$FG" "$MPID" "$CWD" </dev/null)" || continue
+      CMD="$(with_timeout "$(opt quit-timeout 10)" "$(popt "$NAME" script | sed "s#^~#$HOME#")" "$PANE" "$FG" "$MPID" "$CWD")" || continue
       [ -n "$CMD" ] && remember "$PANE" "$CMD" "$BARE" ;;
 
     restart|*)
