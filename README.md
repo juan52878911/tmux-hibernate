@@ -40,8 +40,9 @@ Or by hand:
 run-shell /path/to/tmux-hibernate/hibernate.tmux
 ```
 
-Needs tmux ≥ 3.0, bash (3.2 is enough), `ps` and `awk`. `lsof` is optional
-(custom nvim sockets, codex session ids).
+Needs tmux ≥ 3.0, bash (3.2 is enough), `ps` and `awk`. Editors: Neovim ≥ 0.5
+(driven over its RPC socket) or any Vim with `+mksession`. `lsof` is optional
+(nvim started with a custom `--listen` path, codex session ids).
 
 ## What it never does
 
@@ -49,7 +50,8 @@ Needs tmux ≥ 3.0, bash (3.2 is enough), `ps` and `awk`. `lsof` is optional
 - Stop something busy: a job using more than `@hibernate-busy-cpu` over the
   sample, or an agent that reports itself as working.
 - Lose unsaved work: an editor with modified buffers or running terminal jobs
-  is frozen instead of closed.
+  is frozen instead of closed. So is one that does not answer within 5 s, for
+  example because it is waiting at a prompt (swap file, hit-enter).
 - Touch remote shells (`ssh`, `mosh`…) or anything in `@hibernate-ignore`.
 - Type into a pane that is not sitting at a shell prompt when restoring.
 
